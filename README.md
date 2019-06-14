@@ -3,7 +3,7 @@ Scss-like markup language. It's clean, terse and expressive!
 
 Let's compare Json and SML.
 
-## Here's the SML
+## Here's some SML
 ```scss
 .round-button{
     display:inline-block; margin:7; radius:12; color: 0.6 0.6 0.6
@@ -75,7 +75,7 @@ div{  height:39;  color: 0.6 0.6 0.6; padding:2;
 
 ```
 
-## Now let's compare with equivalent JSON:
+## And the equivalent JSON:
 ```json
 {">":"div",  "height":39, "color":[0.6,0.6,0.6], "padding":2,
     "nodes":[
