@@ -31,7 +31,7 @@ div{  height:39;  color: 0.6 0.6 0.6; padding:2;
 
 ```
 
-## And Html
+## What it might look like in Html
 
 ```html
 <div style="height:39; background:lightgrey;padding:2;">
