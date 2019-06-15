@@ -1,10 +1,25 @@
 # TODO: rewrite in a better and more julian way.
 #
 # This is just kind of thrown together without any real planning but it seems to
-# work. An obviouse design improvement would be to drop the string identifiers 
+# work. An obviouse design improvement would be to drop the string identifiers
 # and use types or something instead. Conssider this as a functional outline for
 # a future product.
+s = raw"""
+@blue:#5555ff
 
+.round-button{
+    display:inline-block; margin:7; radius:12; color: @blue;
+    hover{color: @blue; }
+    circle{ radius:12;}
+}
+
+circle{ class:round-button; circle{ image:"Back.png"} }
+"""
+
+mutable struct Vars
+    name::String
+    Vars(name) = new(name)
+end
 # include("Documents/code/parseScss.jl")
 #-==============================================================================
 # Tokenize Sml text
@@ -39,7 +54,7 @@ while i < length(s)
             while isletter(s[i+1]) || s[i+1] == '-'
                 i+=1
             end
-			push!(toks, ["Vars", s[from+1:i]])
+			push!(toks, ["Vars", Vars(s[from+1:i])])
 	# Text-------------------------
 		elseif s[from] == '"'
 			if s[i+1] == '"' &&  s[i+2] == '"'
@@ -126,6 +141,7 @@ function crunch(toks)
 	push!(toks, ["EndLine",';'], ["EndLine",';']);
 
 # Remove whitspace and other nodes
+push!(stack, toks[1])
 	for t in 2:length(toks)
 		if  !((toks[t][1] == "EndLine" && toks[t-1][1] == "EndLine") || toks[t][1] == "Space" || toks[t][1] == "Comma" || toks[t][1] == "Comment")
 		   push!(stack, toks[t])
@@ -226,6 +242,7 @@ end
 # Text Hex Math
 # Class Vars Tag
 #-==============================================================================
+
 #-==================================OUTLINE=====================================
 #                                               # structure, content, styles
 # element: ["div", Dict(atributes), []]         #    yes       yes     yes
@@ -275,6 +292,7 @@ function nest(toks)
 			push!(this["nodes"], element(toks))
 		elseif toks[t][1] == "Class"
 			push!(this["styles"], toks[t][2] => element(toks, false))
+			println(this["styles"])
 		else
 			# println(toks[t])
 		end
@@ -292,3 +310,48 @@ function writeSml(text)
 	# TODO: write code!
 	return result
 end
+
+
+function addAttributes(node, style)  classname, stylesDict
+
+		attrs = collect(keys(style))
+		for a in attrs
+			if a == "nodes"
+				for n in node["nodes"]
+					for st in style["nodes"]
+						if n[">"] == st[">"]
+							addAttributes(n, st)
+						end
+					end
+				end
+			elseif !haskey(node, a) && a != ">"
+				node[a] = style[a]
+			end
+		end
+end
+
+
+function compile(nodes)
+	for st in nodes
+		if haskey(st, "class")
+			# WARNING: class could be an array!
+			# println(st["class"])
+			if haskey(text["styles"], st["class"])
+				style = text["styles"][st["class"]]
+				addAttributes(st, style)
+			end
+		end
+		if length(st["nodes"]) > 0
+			compile(st["nodes"])
+			println("has kids!")
+		end
+	end
+end
+
+text = readSml(s)
+text["styles"]
+compile(text["nodes"])
+
+print(text["nodes"])
+
+
