@@ -1,52 +1,13 @@
-# include("Documents/code/parseScss.jl")
-
-s = raw"""
-/* comment */
-// one line comment
-@blue: #3bbfce;
-@margin: 16px;
-@something: 2% -3% -3.4% 5%
-@template {
-	div {
-	border-color: steelblue;
-	text:"hello!"
-	}
-}
-
-div {
-  border-color: @blue;
-  color: @blue
-  text:"hello!"
-  text: \"\"\"hello!\n\"\"\"
-}
-
-.border {
-  padding: @margin; margin: @margin; border-color: @blue;
-}
-"""
-
-
-
-
-
-# mutable struct Node
-# 	value::String
-# 	value::Dict
-# 	kids::Array{Any}
-# 	Node(str,kids) = new(str,kids)
-# 	Node(str) = new(str,[])
-# end
-
-
-
-
-# NEED: style, class, template
-# styles are set within a structure or template
-# div{ ... }
-# .myclass{ ... }
-# @variable or... @template{ ... }
-#-==============================================================================
+# TODO: rewrite in a better and more julian way.
 #
+# This is just kind of thrown together without any real planning but it seems to
+# work. An obviouse design improvement would be to drop the string identifiers 
+# and use types or something instead. Conssider this as a functional outline for
+# a future product.
+
+# include("Documents/code/parseScss.jl")
+#-==============================================================================
+# Tokenize Sml text
 #-==============================================================================
 function tokens(s)
 	toks = []
@@ -158,7 +119,6 @@ while i < length(s)
   return toks
 end
 #-==============================================================================
-#
 # "Class" "Identifier" "Vars" "Comment" "Comma" "Instance"  "OpenBl" "CloseBl"
 #-==============================================================================
 function crunch(toks)
@@ -176,7 +136,7 @@ function crunch(toks)
 	toks = stack
 	stack = []
 	t=1
-	push!(toks, ["telemer",';'],["telemer",';'],["telemer",';']);
+	push!(toks, ["telemer",';'],["telemer",';'],["telemer",';'],["telemer",';'],["telemer",';']);
 	while t < length(toks)
 		if  toks[t][1] == "Identifier" && toks[t+1][1] == "Instance"
 			toks[t][1] = "Attribute"
@@ -195,14 +155,14 @@ function crunch(toks)
 	while t <= length(toks)
 		if  toks[t][1] == "Number" && (toks[t+1][1] == "Identifier" || toks[t+1][1] == "Unit") # Unit
 			push!(stack, ["Identifier", [toks[t][2], toks[t+1][2]]])
-			t+=1
+			t+=2
 		else
 			push!(stack, toks[t])
+			t+=1
 		end
-		t+=1
 	end
 
-	# Make Arrays
+	# Make Arrays      {[\n\s]+}    [^{}]+
 	# Hex Number Text Var Identifier
 	toks = stack
 	stack = []
@@ -219,8 +179,8 @@ function crunch(toks)
 			push!(stack, ["Identifier", a])
 		else
 			push!(stack, toks[t])
+			t+=1
 		end
-		t+=1
 	end
 
 
@@ -238,16 +198,16 @@ i=1
 			end
 		# Attribute
 		elseif  one[1] == "Attribute" #&& two[1] == "Identifier"
-			if two[1] == "Vars" || two[1] == "Text" || two[1] == "Hex" || two[1] == "Identifier"
+			if two[1] == "Vars" || two[1] == "Text" || two[1] == "Hex" || two[1] == "Identifier" || two[1] == "Number"
 				push!(stack, [one[1], one[2], two[1], two[2]])
 			i+=2
 			end
 		elseif  one[1] == "CloseBl"
 			push!(stack, one)
 			i+=1
-		elseif  one[1] == "EndLine" ||   one[1] == "Space"
+		elseif  one[1] == "EndLine" || one[1] == "Space"
 			i+=1
-		elseif  one[1] == "Identifier" &&   two[1] == "OpenBl"
+		elseif  one[1] == "Identifier" && two[1] == "OpenBl"
 			one[1] = "Tag"
 			push!(stack, one)
 			push!(stack, two)
@@ -257,8 +217,6 @@ i=1
 			i+=1
 		end
 	end
-
-
 
 	return stack
 end
@@ -325,15 +283,12 @@ function nest(toks)
 	return this
 end
 
+function readSml(text)
+	return nest( crunch(tokens(text)) )
+end
 
-doc = nest( crunch(tokens(s)) )
-print(doc)
-
-
-
-
-
-# list = crunch(tokens(s))
-# for i in list
-# 	println(i)
-# end
+function writeSml(text)
+	result = " "
+	# TODO: write code!
+	return result
+end
